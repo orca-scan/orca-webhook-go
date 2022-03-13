@@ -1,4 +1,4 @@
-# orca-webhook-python
+# orca-webhook-go
 
 Example of how to build an [Orca Scan WebHook](https://orcascan.com/docs/api/webhooks) endpoint in using [Go](https://go.dev/).
 
