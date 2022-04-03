@@ -1,6 +1,6 @@
 # orca-webhook-go
 
-Example of how to build an [Orca Scan WebHook](https://orcascan.com/docs/api/webhooks) endpoint in using [Go](https://go.dev/).
+Example of how to build an [Orca Scan WebHook](https://orcascan.com/docs/api/webhooks) endpoint and [Orca Scan WebHook In](https://orcascan.com/guides/how-to-update-orca-scan-from-your-system-4b249706) in using [Go](https://go.dev/).
 
 ## Install & Run
 
@@ -45,8 +45,12 @@ curl --location --request POST 'http://127.0.0.1:3000' \
 
 This [example](server.go) work as follows:
 
+### WebHook Out 
+
+[Orca Scan WebHook](https://orcascan.com/docs/api/webhooks)
+
 ```go
-func WebHookHandler(w http.ResponseWriter, r *http.Request) {
+func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 	// Read body
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -97,15 +101,48 @@ func WebHookHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 ```
+### WebHook In 
 
+and [Orca Scan WebHook In](https://orcascan.com/guides/how-to-update-orca-scan-from-your-system-4b249706)
+
+```go
+func webhookIn() {
+	values := map[string]string{
+		"___orca_action": "add",
+		"Barcode": "0123456789",
+		"Name": "New 1",
+		"Quantity": "12",
+		"Description": "Add new row example",
+	}
+	jsonValue, _ := json.Marshal(values)
+	// The following example adds a new row to a sheet, setting the value of Barcode, Name, Quantity and Description
+	// TODO: change url to https://api.orcascan.com/sheets/{id}
+	response, err := http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
+	if err != nil {
+        // read response error
+		fmt.Println(err)
+    } else {
+		// read response body
+		body, _ := ioutil.ReadAll(response.Body)
+		data := map[string]string{}
+		jsonErr := json.Unmarshal([]byte(body), &data)
+		if jsonErr != nil {
+			return
+		}
+		fmt.Println(data)
+    }
+}
+```
 ## Troubleshooting
 
-If you run into any issues not listed here, please [open a ticket](https://github.com/orca-scan/orca-webhook-python/issues).
+If you run into any issues not listed here, please [open a ticket](https://github.com/orca-scan/orca-webhook-go/issues).
 
 ## Examples in other langauges
 * [orca-webhook-dotnet](https://github.com/orca-scan/orca-webhook-dotnet)
 * [orca-webhook-python](https://github.com/orca-scan/orca-webhook-python)
-* [orca-webhook-node](https://github.com/orca-scan/orca-webhook-node)
+* [orca-webhook-go](https://github.com/orca-scan/orca-webhook-go)
+* [orca-webhook-java](https://github.com/orca-scan/orca-webhook-java)
+* [orca-webhook-php](https://github.com/orca-scan/orca-webhook-php)
 
 ## History
 

@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"bytes"
 )
 
-func WebHookHandler(w http.ResponseWriter, r *http.Request) {
+func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 	// Read body
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -59,11 +60,40 @@ func WebHookHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func webhookIn() {
+	values := map[string]string{
+		"___orca_action": "add",
+		"Barcode": "0123456789",
+		"Name": "New 1",
+		"Quantity": "12",
+		"Description": "Add new row example",
+	}
+	jsonValue, _ := json.Marshal(values)
+	// The following example adds a new row to a sheet, setting the value of Barcode, Name, Quantity and Description
+	// TODO: change url to https://api.orcascan.com/sheets/{id}
+	response, err := http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
+	if err != nil {
+        // read response error
+		fmt.Println(err)
+    } else {
+		// read response body
+		body, _ := ioutil.ReadAll(response.Body)
+		data := map[string]string{}
+		jsonErr := json.Unmarshal([]byte(body), &data)
+		if jsonErr != nil {
+			return
+		}
+		fmt.Println(data)
+    }
+}
+
 func main() {
 
-    http.HandleFunc("/", WebHookHandler)
+    //http.HandleFunc("/", webHookOutHandler)
+	webhookIn()
 
     fmt.Println("Server started at port 3000")
     log.Fatal(http.ListenAndServe(":3000", nil))
+	
 }
 
