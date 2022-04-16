@@ -9,35 +9,55 @@ import (
 	"bytes"
 )
 
+type OrcaBarcode struct {
+	Barcode					string
+    Date 					string
+    Description 			string
+    Example					string
+    Name					string
+    Quantity				int
+    ___autofocus			string
+    ___autoselect			string
+    ___lastSchemaVersion	string
+    ___orca_action			string
+    ___orca_row_id			string
+    ___orca_sheet_name		string
+    ___orca_user_email		string
+    ___owner				string
+    ___schemaVersion		string
+}
+
 func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 	// Read body
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	// Parse JSON data
-	data := map[string]string{}
-	jsonErr := json.Unmarshal([]byte(body), &data)
+	var barcode OrcaBarcode
+	jsonErr := json.Unmarshal([]byte(body), &barcode)
 	if jsonErr != nil {
+		fmt.Println(jsonErr)
 		http.Error(w, jsonErr.Error(), 500)
 		return
 	}
 
     // dubug purpose: show in console raw data received
-	fmt.Println(data)
+	fmt.Println(barcode)
 
 	// get the name of the action that triggered this request (add, update, delete, test)
-	action := data["___orca_action"]
+	action := barcode.___orca_action
 
 	// get the name of the sheet this action impacts
-	sheetName := data["___orca_sheet_name"]
+	sheetName := barcode.___orca_sheet_name
 	fmt.Println(sheetName)
 
 	// get the email of the user who preformed the action (empty if not HTTPS)
-	userEmail := data["___orca_user_email"]
+	userEmail := barcode.___orca_user_email
 	fmt.Println(userEmail)
 
 	// NOTE:
@@ -87,9 +107,18 @@ func webhookIn() {
     }
 }
 
+func webHookInHandler(w http.ResponseWriter, r *http.Request) {
+	webhookIn()
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+	return
+}
+
+
 func main() {
 
-    http.HandleFunc("/", webHookOutHandler)
+    http.HandleFunc("/orca-webhook-out", webHookOutHandler)
+	http.HandleFunc("/trigger-webhook-in", webHookInHandler)
 
     fmt.Println("Server started at port 3000")
     log.Fatal(http.ListenAndServe(":3000", nil))

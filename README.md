@@ -16,7 +16,7 @@ Your WebHook receiver will now be running on port 3000.
 You can emulate an Orca Scan WebHook using [cURL](https://dev.to/ibmdeveloper/what-is-curl-and-why-is-it-all-over-api-docs-9mh) by running the following:
 
 ```bash
-curl --location --request POST 'http://127.0.0.1:3000' \
+curl --location --request POST 'http://127.0.0.1:3000/orca-webhook-out' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "___orca_action": "add",
@@ -55,30 +55,32 @@ func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	// Parse JSON data
-	data := map[string]string{}
-	jsonErr := json.Unmarshal([]byte(body), &data)
+	var barcode OrcaBarcode
+	jsonErr := json.Unmarshal([]byte(body), &barcode)
 	if jsonErr != nil {
+		fmt.Println(jsonErr)
 		http.Error(w, jsonErr.Error(), 500)
 		return
 	}
 
     // dubug purpose: show in console raw data received
-	fmt.Println(data)
+	fmt.Println(barcode)
 
 	// get the name of the action that triggered this request (add, update, delete, test)
-	action := data["___orca_action"]
+	action := barcode.___orca_action
 
 	// get the name of the sheet this action impacts
-	sheetName := data["___orca_sheet_name"]
+	sheetName := barcode.___orca_sheet_name
 	fmt.Println(sheetName)
 
 	// get the email of the user who preformed the action (empty if not HTTPS)
-	userEmail := data["___orca_user_email"]
+	userEmail := barcode.___orca_user_email
 	fmt.Println(userEmail)
 
 	// NOTE:
@@ -133,6 +135,17 @@ func webhookIn() {
     }
 }
 ```
+
+Use `http://127.0.0.1:3000/trigger-webhook-in` to trigget the in webhook and send the request.
+
+## Test server locally on Orca Cloud
+
+To expose the server securely from localhost and test it easily on the real Orca Cloud environment you can use [Secure Tunnels](https://ngrok.com/docs/secure-tunnels#what-are-ngrok-secure-tunnels). Take a look at [Ngrok](https://ngrok.com/) or [Cloudflare](https://www.cloudflare.com/).
+
+```bash
+ngrok http 3000
+```
+
 ## Troubleshooting
 
 If you run into any issues not listed here, please [open a ticket](https://github.com/orca-scan/orca-webhook-go/issues).
