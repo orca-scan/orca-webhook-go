@@ -118,7 +118,7 @@ func webHookInHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
     http.HandleFunc("/orca-webhook-out", webHookOutHandler)
-	http.HandleFunc("/trigger-webhook-in", webHookInHandler)
+    http.HandleFunc("/trigger-webhook-in", webHookInHandler)
 
     fmt.Println("Server started at port 3000")
     log.Fatal(http.ListenAndServe(":3000", nil))
