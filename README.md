@@ -50,6 +50,24 @@ This [example](server.go) work as follows:
 [Orca Scan WebHook](https://orcascan.com/docs/api/webhooks)
 
 ```go
+type OrcaBarcode struct {
+	Barcode					string
+    Date 					string
+    Description 			string
+    Example					string
+    Name					string
+    Quantity				int
+    ___autofocus			string
+    ___autoselect			string
+    ___lastSchemaVersion	string
+    ___orca_action			string
+    ___orca_row_id			string
+    ___orca_sheet_name		string
+    ___orca_user_email		string
+    ___owner				string
+    ___schemaVersion		string
+}
+
 func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 	// Read body
 	body, err := ioutil.ReadAll(r.Body)
