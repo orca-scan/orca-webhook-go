@@ -126,7 +126,7 @@ func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 and [Orca Scan WebHook In](https://orcascan.com/guides/how-to-update-orca-scan-from-your-system-4b249706)
 
 ```go
-func webhookIn() {
+func webHookInHandler(w http.ResponseWriter, r *http.Request) {
 	values := map[string]string{
 		"___orca_action": "add",
 		"Barcode": "0123456789",
@@ -151,6 +151,10 @@ func webhookIn() {
 		}
 		fmt.Println(data)
     }
+	
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+	return
 }
 ```
 
