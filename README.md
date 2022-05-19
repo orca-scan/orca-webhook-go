@@ -7,6 +7,19 @@ Example of how to build an [Orca Scan WebHook](https://orcascan.com/docs/api/web
 First ensure you have [Go](https://go.dev/) installed. If not, follow [this guide](https://go.dev/doc/install).
 
 ```bash
+# should return 1.13 or higher
+go version
+```
+
+Then execute the following:
+
+```bash
+# download this example code
+git clone https://github.com/orca-scan/orca-webhook-go.git
+
+# go into the new directory
+cd orca-webhook-go
+
 # start the project
 go run server.go
 ```
@@ -87,7 +100,7 @@ func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    // dubug purpose: show in console raw data received
+    // debug purpose: show in console raw data received
 	fmt.Println(barcode)
 
 	// get the name of the action that triggered this request (add, update, delete, test)
@@ -158,7 +171,7 @@ func webHookInHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Use `http://127.0.0.1:3000/trigger-webhook-in` to trigget the in webhook and send the request.
+Use `http://127.0.0.1:3000/trigger-webhook-in` to trigger the in webhook and send the request.
 
 ## Test server locally against Orca Cloud
 
