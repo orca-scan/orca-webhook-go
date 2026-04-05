@@ -23,11 +23,11 @@ When a barcode is scanned and a row changes, Orca Scan sends a `POST` request to
 
 Every request includes these system fields:
 
-| Field | Description |
-|---|---|
-| `___orca_event` | `rows:add`, `rows:update`, `rows:delete`, or `test` |
-| `___orca_sheet_name` | The sheet that triggered the event |
-| `___orca_user_email` | Email of the user _(HTTPS only)_ |
+| Field                | Description                                         |
+|----------------------|-----------------------------------------------------|
+| `___orca_event`      | `rows:add`, `rows:update`, `rows:delete`, or `test` |
+| `___orca_sheet_name` | The sheet that triggered the event                  |
+| `___orca_user_email` | Email of the user _(HTTPS only)_                    |
 
 All other fields match your sheet column names exactly _(case and space sensitive)_.
 
@@ -81,101 +81,17 @@ See the [REST API docs](https://orcascan.com/guides/barcode-scanning-rest-api-f0
 
 ## Examples in other languages
 
-| Language | Repository |
-|---|---|
-| C# | [orca-webhook-dotnet](https://github.com/orca-scan/orca-webhook-dotnet) |
-| Python | [orca-webhook-python](https://github.com/orca-scan/orca-webhook-python) |
-| Go | [orca-webhook-go](https://github.com/orca-scan/orca-webhook-go) |
-| Java | [orca-webhook-java](https://github.com/orca-scan/orca-webhook-java) |
-| PHP | [orca-webhook-php](https://github.com/orca-scan/orca-webhook-php) |
+| Language | Repository                                                              |
+|----------|-------------------------------------------------------------------------|
+| C#       | [orca-webhook-dotnet](https://github.com/orca-scan/orca-webhook-dotnet) |
+| Python   | [orca-webhook-python](https://github.com/orca-scan/orca-webhook-python) |
+| Go       | [orca-webhook-go](https://github.com/orca-scan/orca-webhook-go)         |
+| Java     | [orca-webhook-java](https://github.com/orca-scan/orca-webhook-java)     |
+| PHP      | [orca-webhook-php](https://github.com/orca-scan/orca-webhook-php)       |
 
 ## Help
 
 [Chat to us live](https://orcascan.com/#chat) if you run into any issues.
-
-## License
-
-&copy; Orca Scan, the [Barcode Scanner app for iOS and Android](https://orcascan.com).
-
-
-	switch action {
-    case "add":
-        // TODO: do something when a row has been added
-    case "update":
-        // TODO: do something when a row has been updated
-    case "delete":
-        // TODO: do something when a row has been deleted
-	case "test":
-		// TODO: do something when the user in the web app hits the test button
-	}
-	
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-	return
-}
-```
-### WebHook In 
-
-and [Orca Scan WebHook In](https://orcascan.com/guides/how-to-update-orca-scan-from-your-system-4b249706)
-
-```go
-func webHookInHandler(w http.ResponseWriter, r *http.Request) {
-	values := map[string]string{
-		"___orca_action": "add",
-		"Barcode": "0123456789",
-		"Name": "New 1",
-		"Quantity": "12",
-		"Description": "Add new row example",
-	}
-	jsonValue, _ := json.Marshal(values)
-	// The following example adds a new row to a sheet, setting the value of Barcode, Name, Quantity and Description
-	// TODO: change url to https://api.orcascan.com/sheets/{id}
-	response, err := http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
-	if err != nil {
-        // read response error
-		fmt.Println(err)
-    } else {
-		// read response body
-		body, _ := ioutil.ReadAll(response.Body)
-		data := map[string]string{}
-		jsonErr := json.Unmarshal([]byte(body), &data)
-		if jsonErr != nil {
-			return
-		}
-		fmt.Println(data)
-    }
-	
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-	return
-}
-```
-
-Use `http://127.0.0.1:3000/trigger-webhook-in` to trigger the in webhook and send the request.
-
-## Test server locally against Orca Cloud
-
-To expose the server securely from localhost and test it easily against the real Orca Cloud environment you can use [Secure Tunnels](https://ngrok.com/docs/secure-tunnels#what-are-ngrok-secure-tunnels). Take a look at [Ngrok](https://ngrok.com/) or [Cloudflare](https://www.cloudflare.com/).
-
-```bash
-ngrok http 3000
-```
-
-## Troubleshooting
-
-If you run into any issues not listed here, please [open a ticket](https://github.com/orca-scan/orca-webhook-go/issues).
-
-## Examples in other langauges
-* [orca-webhook-dotnet](https://github.com/orca-scan/orca-webhook-dotnet)
-* [orca-webhook-python](https://github.com/orca-scan/orca-webhook-python)
-* [orca-webhook-go](https://github.com/orca-scan/orca-webhook-go)
-* [orca-webhook-java](https://github.com/orca-scan/orca-webhook-java)
-* [orca-webhook-php](https://github.com/orca-scan/orca-webhook-php)
-* [orca-webhook-node](https://github.com/orca-scan/orca-webhook-node)
-
-## History
-
-For change-log, check [releases](https://github.com/orca-scan/orca-webhook-go/releases).
 
 ## License
 
