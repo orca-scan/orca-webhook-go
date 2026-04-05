@@ -1,124 +1,89 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"bytes"
 )
 
-type OrcaBarcode struct {
-	Barcode					string
-    Date 					string
-    Description 			string
-    Example					string
-    Name					string
-    Quantity				int
-    ___autofocus			string
-    ___autoselect			string
-    ___lastSchemaVersion	string
-    ___orca_action			string
-    ___orca_row_id			string
-    ___orca_sheet_name		string
-    ___orca_user_email		string
-    ___owner				string
-    ___schemaVersion		string
-}
-
 func webHookOutHandler(w http.ResponseWriter, r *http.Request) {
-	// Read body
-	body, err := ioutil.ReadAll(r.Body)
+	// read request body
+	body, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Parse JSON data
-	var barcode OrcaBarcode
-	jsonErr := json.Unmarshal([]byte(body), &barcode)
-	if jsonErr != nil {
-		fmt.Println(jsonErr)
-		http.Error(w, jsonErr.Error(), 500)
+	// parse JSON into a map to handle any sheet fields dynamically
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-    // dubug purpose: show in console raw data received
-	fmt.Println(barcode)
+	// debug purpose: show in console raw data received
+	formatted, _ := json.MarshalIndent(data, "", "  ")
+	fmt.Printf("Request received:\n%s\n", formatted)
 
-	// get the name of the action that triggered this request (add, update, delete, test)
-	action := barcode.___orca_action
+	// get the name of the event that triggered this request (rows:add, rows:update, rows:delete, test)
+	eventName, _ := data["___orca_event"].(string)
 
 	// get the name of the sheet this action impacts
-	sheetName := barcode.___orca_sheet_name
-	fmt.Println(sheetName)
+	sheetName, _ := data["___orca_sheet_name"].(string)
 
-	// get the email of the user who preformed the action (empty if not HTTPS)
-	userEmail := barcode.___orca_user_email
-	fmt.Println(userEmail)
+	// get the email of the user who performed the action (empty if not HTTPS)
+	userEmail, _ := data["___orca_user_email"].(string)
 
 	// NOTE:
-    // orca system fields start with ___
-    // you can access the value of each field using the field name (data["Name"], data["Barcode"], data["Location"])
+	// orca system fields start with ___
+	// you can access the value of each field using the field name (data["Name"], data["Barcode"], data["Location"])
+	_, _ = sheetName, userEmail
 
-	switch action {
-    case "add":
-        // TODO: do something when a row has been added
-    case "update":
-        // TODO: do something when a row has been updated
-    case "delete":
-        // TODO: do something when a row has been deleted
+	switch eventName {
+	case "rows:add":
+		// TODO: do something when a row has been added
+	case "rows:update":
+		// TODO: do something when a row has been updated
+	case "rows:delete":
+		// TODO: do something when a row has been deleted
 	case "test":
 		// TODO: do something when the user in the web app hits the test button
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-	return
 }
 
 func webHookInHandler(w http.ResponseWriter, r *http.Request) {
-	values := map[string]string{
-		"___orca_action": "add",
-		"Barcode": "0123456789",
-		"Name": "New 1",
-		"Quantity": "12",
-		"Description": "Add new row example",
-	}
-	jsonValue, _ := json.Marshal(values)
 	// The following example adds a new row to a sheet, setting the value of Barcode, Name, Quantity and Description
+	payload := map[string]interface{}{
+		"___orca_action": "add",
+		"Barcode":        "0123456789",
+		"Name":           "New 1",
+		"Quantity":       12,
+		"Description":    "Add new row example",
+	}
+	jsonValue, _ := json.Marshal(payload)
+
 	// TODO: change url to https://api.orcascan.com/sheets/{id}
 	response, err := http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
 	if err != nil {
-        // read response error
-		fmt.Println(err)
-    } else {
-		// read response body
-		body, _ := ioutil.ReadAll(response.Body)
-		data := map[string]string{}
-		jsonErr := json.Unmarshal([]byte(body), &data)
-		if jsonErr != nil {
-			return
-		}
-		fmt.Println(data)
-    }
-	
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer response.Body.Close()
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-	return
 }
 
-
 func main() {
+	http.HandleFunc("/orca-webhook-out", webHookOutHandler)
+	http.HandleFunc("/trigger-webhook-in", webHookInHandler)
 
-    http.HandleFunc("/orca-webhook-out", webHookOutHandler)
-    http.HandleFunc("/trigger-webhook-in", webHookInHandler)
-
-    fmt.Println("Server started at port 3000")
-    log.Fatal(http.ListenAndServe(":3000", nil))
-	
+	fmt.Println("Server started at port 8888")
+	log.Fatal(http.ListenAndServe(":8888", nil))
 }
 
